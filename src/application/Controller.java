@@ -29,7 +29,7 @@ public class Controller {
 	@FXML private Pane paneL;
 	@FXML private Pane paneR;
 	
-	public void initialize() {
+	public void initialize() throws Exception {
         // do initialization and configuration work...
 
 		sliderL.valueProperty().addListener(new ChangeListener() {
@@ -58,18 +58,16 @@ public class Controller {
 	    p.getChildren().add(v);
 	}
 	
-	private BufferedImage createBufferedImg (File file) {
+	private BufferedImage createBufferedImg (File file) throws Exception {
 		FileInputStream fileInputStream = null;
 		byte[] stream = new byte[(int) file.length()];
 		BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
 		int baseIdx;
 		
-		try {
-			//convert rgb file into byte array
-			fileInputStream = new FileInputStream(file);
-			fileInputStream.read(stream);
-			fileInputStream.close();
-		} catch (Exception e) {}
+		//convert rgb file into byte array
+		fileInputStream = new FileInputStream(file);
+		fileInputStream.read(stream);
+		fileInputStream.close();
 
 		// Save RGB values of image individually in byte
 		for(int y = 0; y < HEIGHT; y++) {

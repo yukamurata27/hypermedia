@@ -46,15 +46,17 @@ public class Controller {
             }
         });
 		
-		//////////////////////////////////////////////////////////////////////////////////
 		File file = new File("../Source/USCOne/USCOne0001.rgb");
-		BufferedImage img = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
-		img = createBufferedImg(file);
-		
-	    Image i = SwingFXUtils.toFXImage(img, null);
-	    ImageView v = new ImageView(i);
-	    paneL.getChildren().add(v);
+		addFrame(paneL, createBufferedImg(file));
+		addFrame(paneR, createBufferedImg(file));
     }
+	
+	private void addFrame (Pane p, BufferedImage img) {
+		Image i = SwingFXUtils.toFXImage(img, null);
+	    ImageView v = new ImageView(i);
+	    p.getChildren().clear();
+	    p.getChildren().add(v);
+	}
 	
 	private BufferedImage createBufferedImg (File file) {
 		FileInputStream fileInputStream = null;
@@ -63,13 +65,13 @@ public class Controller {
 		int baseIdx;
 		
 		try {
-			//convert file into byte array
+			//convert rgb file into byte array
 			fileInputStream = new FileInputStream(file);
 			fileInputStream.read(stream);
 			fileInputStream.close();
 		} catch (Exception e) {}
 
-		// Save each R, G, and B values of image in byte
+		// Save RGB values of image individually in byte
 		for(int y = 0; y < HEIGHT; y++) {
 			for(int x = 0; x < WIDTH; x++) {
 				baseIdx = x + WIDTH * y;

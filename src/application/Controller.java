@@ -32,26 +32,40 @@ public class Controller {
 	public void initialize() throws Exception {
         // do initialization and configuration work...
 
+		setInitImg();
+
 		sliderL.valueProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue arg0, Object arg1, Object arg2) {
-            	textL.setText("Frame " + String.valueOf((int) sliderL.getValue()));
+            	int frameNum = (int) sliderL.getValue();
+            	textL.setText("Frame " + String.valueOf(frameNum));
+            	File file = new File("../Source/USCOne/USCOne" + String.format("%04d", frameNum) + ".rgb");
+            	try {
+            		changeFrame(paneL, createBufferedImg(file));
+            	} catch (Exception e) {}
             }
         });
 
 		sliderR.valueProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue arg0, Object arg1, Object arg2) {
-            	textR.setText("Frame " + String.valueOf((int) sliderR.getValue()));
+            	int frameNum = (int) sliderR.getValue();
+            	textR.setText("Frame " + String.valueOf(frameNum));
+            	File file = new File("../Source/USCOne/USCOne" + String.format("%04d", frameNum) + ".rgb");
+            	try {
+            		changeFrame(paneR, createBufferedImg(file));
+            	} catch (Exception e) {}
             }
         });
-		
-		File file = new File("../Source/USCOne/USCOne0001.rgb");
-		addFrame(paneL, createBufferedImg(file));
-		addFrame(paneR, createBufferedImg(file));
     }
 	
-	private void addFrame (Pane p, BufferedImage img) {
+	private void setInitImg () throws Exception {
+		File file = new File("../Source/USCOne/USCOne0001.rgb");
+		changeFrame(paneL, createBufferedImg(file));
+    	changeFrame(paneR, createBufferedImg(file));
+	}
+	
+	private void changeFrame (Pane p, BufferedImage img) {
 		Image i = SwingFXUtils.toFXImage(img, null);
 	    ImageView v = new ImageView(i);
 	    p.getChildren().clear();

@@ -7,12 +7,17 @@ import java.io.FileInputStream;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 
 public class Controller {
 	private final int WIDTH = 352;
@@ -21,6 +26,9 @@ public class Controller {
 	private byte[][] red = new byte[HEIGHT][WIDTH];
 	private byte[][] green = new byte[HEIGHT][WIDTH];
 	private byte[][] blue = new byte[HEIGHT][WIDTH];
+	
+	private File primaryPath;
+	private String primaryString;
 
 	@FXML private Slider sliderL;
 	@FXML private Slider sliderR;
@@ -28,20 +36,18 @@ public class Controller {
 	@FXML private Text textR;
 	@FXML private Pane paneL;
 	@FXML private Pane paneR;
-	
+	@FXML private Button importButton;
+
 	public void initialize() throws Exception {
         // do initialization and configuration work...
-
-		setInitImg();
 
 		sliderL.valueProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue arg0, Object arg1, Object arg2) {
             	int frameNum = (int) sliderL.getValue();
             	textL.setText("Frame " + String.valueOf(frameNum));
-            	File file = new File("../Source/USCOne/USCOne" + String.format("%04d", frameNum) + ".rgb");
             	try {
-            		changeFrame(paneL, createBufferedImg(file));
+            		changeFrame(paneL, createBufferedImg(new File(primaryString + "/" + (primaryString.substring(primaryString.lastIndexOf("/") + 1) + String.format("%04d", frameNum) + ".rgb"))));
             	} catch (Exception e) {}
             }
         });
@@ -59,10 +65,10 @@ public class Controller {
         });
     }
 	
-	private void setInitImg () throws Exception {
-		File file = new File("../Source/USCOne/USCOne0001.rgb");
-		changeFrame(paneL, createBufferedImg(file));
-    	changeFrame(paneR, createBufferedImg(file));
+	private void setInitImg (File path) throws Exception {
+		primaryString = path.getAbsolutePath();
+		changeFrame(paneL, createBufferedImg(new File(primaryString + "/" + (primaryString.substring(primaryString.lastIndexOf("/") + 1) + "0001.rgb"))));
+    	//changeFrame(paneR, createBufferedImg(file));
 	}
 	
 	private void changeFrame (Pane p, BufferedImage img) {
@@ -97,5 +103,24 @@ public class Controller {
 		}
 		
 		return img;
+	}
+	
+	@FXML
+	private void import_primary(ActionEvent event) {
+		Stage stage = new Stage();
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle("Choose a primary video");
+
+		importButton.setOnAction(
+				new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent e) {
+						primaryPath = directoryChooser.showDialog(stage);
+						try {
+							setInitImg(primaryPath);
+						} catch (Exception error){}
+					}
+				}
+		);
 	}
 }

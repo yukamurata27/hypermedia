@@ -29,6 +29,8 @@ public class Controller {
 	
 	private File primaryPath;
 	private String primaryString;
+	private File secondaryPath;
+	private String secondaryString;
 
 	@FXML private Slider sliderL;
 	@FXML private Slider sliderR;
@@ -36,7 +38,8 @@ public class Controller {
 	@FXML private Text textR;
 	@FXML private Pane paneL;
 	@FXML private Pane paneR;
-	@FXML private Button importButton;
+	@FXML private Button importPButton;
+	@FXML private Button importSButton;
 
 	public void initialize() throws Exception {
         // do initialization and configuration work...
@@ -59,16 +62,20 @@ public class Controller {
             	textR.setText("Frame " + String.valueOf(frameNum));
             	File file = new File("../Source/USCOne/USCOne" + String.format("%04d", frameNum) + ".rgb");
             	try {
-            		changeFrame(paneR, createBufferedImg(file));
+            		changeFrame(paneR, createBufferedImg(new File(secondaryString + "/" + (secondaryString.substring(secondaryString.lastIndexOf("/") + 1) + String.format("%04d", frameNum) + ".rgb"))));
             	} catch (Exception e) {}
             }
         });
     }
-	
-	private void setInitImg (File path) throws Exception {
+
+	private void setLeftImg (File path) throws Exception {
 		primaryString = path.getAbsolutePath();
 		changeFrame(paneL, createBufferedImg(new File(primaryString + "/" + (primaryString.substring(primaryString.lastIndexOf("/") + 1) + "0001.rgb"))));
-    	//changeFrame(paneR, createBufferedImg(file));
+	}
+	
+	private void setRightImg (File path) throws Exception {
+		secondaryString = path.getAbsolutePath();
+		changeFrame(paneR, createBufferedImg(new File(secondaryString + "/" + (secondaryString.substring(secondaryString.lastIndexOf("/") + 1) + "0001.rgb"))));
 	}
 	
 	private void changeFrame (Pane p, BufferedImage img) {
@@ -101,7 +108,7 @@ public class Controller {
 				img.setRGB(x, y, pix);
 			}
 		}
-		
+
 		return img;
 	}
 	
@@ -111,13 +118,32 @@ public class Controller {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle("Choose a primary video");
 
-		importButton.setOnAction(
+		importPButton.setOnAction(
 				new EventHandler<ActionEvent>() {
 					@Override
 					public void handle(ActionEvent e) {
 						primaryPath = directoryChooser.showDialog(stage);
 						try {
-							setInitImg(primaryPath);
+							setLeftImg(primaryPath);
+						} catch (Exception error){}
+					}
+				}
+		);
+	}
+
+	@FXML
+	private void import_secondary(ActionEvent event) {
+		Stage stage = new Stage();
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle("Choose a secondary video");
+
+		importSButton.setOnAction(
+				new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent e) {
+						secondaryPath = directoryChooser.showDialog(stage);
+						try {
+							setRightImg(secondaryPath);
 						} catch (Exception error){}
 					}
 				}

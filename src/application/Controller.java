@@ -60,7 +60,6 @@ public class Controller {
             public void changed(ObservableValue arg0, Object arg1, Object arg2) {
             	int frameNum = (int) sliderR.getValue();
             	textR.setText("Frame " + String.valueOf(frameNum));
-            	File file = new File("../Source/USCOne/USCOne" + String.format("%04d", frameNum) + ".rgb");
             	try {
             		changeFrame(paneR, createBufferedImg(new File(secondaryString + "/" + (secondaryString.substring(secondaryString.lastIndexOf("/") + 1) + String.format("%04d", frameNum) + ".rgb"))));
             	} catch (Exception e) {}

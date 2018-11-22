@@ -16,5 +16,6 @@
       <Text fx:id="textR" layoutX="576.0" layoutY="384.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Frame 0" wrappingWidth="82.00004324316978" />
       <Button fx:id="importPButton" layoutX="86.0" layoutY="21.0" mnemonicParsing="false" onAction="#import_primary" style="-fx-background-color: rgb(153, 0, 0);" text="Import Primary Video" textFill="WHITE" />
       <Button fx:id="importSButton" layoutX="265.0" layoutY="21.0" mnemonicParsing="false" onAction="#import_secondary" style="-fx-background-color: rgb(153, 0, 0) rgb(153, 0, 0);" text="Import Secondary Video" textFill="WHITE" />
+      <Button fx:id="makeLinkBtn" layoutX="463.0" layoutY="21.0" mnemonicParsing="false" onAction="#makeNewBox" text="Create new hyperlink" />
    </children>
 </AnchorPane>

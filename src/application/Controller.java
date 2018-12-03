@@ -3,16 +3,20 @@ package application;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+import org.json.*;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -59,6 +63,7 @@ public class Controller {
 	private double boxW;
 	private double boxH;
 	private int btnNum = 0;
+	private ArrayList<String> tmpData = new ArrayList<String>();
 	
 	private JSONObject obj1;
 	private JSONObject obj2;
@@ -378,15 +383,65 @@ public class Controller {
             @Override public void handle(ActionEvent e) {
             	
             	//  JSON  /////////////////////////////////////////////////////////////
+            	JSONParser jsonParser = new JSONParser();
             	JSONArray jsonArray = new JSONArray();
             	Object obj = new Object();
             	try {
-	            	JSONParser jsonParser = new JSONParser();
 	            	obj = jsonParser.parse(new FileReader(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json"));
 	            	jsonArray = (JSONArray)obj;
             	} catch (Exception exc){}
 
+            	if (jsonArray != null) {
+                    //List<URL> urlList = new ArrayList<URL>();
+                    Iterator it = jsonArray.iterator();
+                    while (it.hasNext()) {
+                        //String primary = it.next().toString();
+                    	JSONObject jsonObject = (JSONObject) it.next();
+
+                    	for(Iterator iterator = jsonObject.keySet().iterator(); iterator.hasNext();) {
+                    	    String key = (String) iterator.next();
+                    	    if (key.equals(primaryPath)) {
+                    	    	//append
+                    	    	/*try {
+									obj = jsonParser.parse(new FileReader(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json"));
+								} catch (Exception e1) {}
+                    	    	jsonArray = (JSONArray) obj;
+                                JSONArray jsonPrimaryPath = (JSONArray) jsonArray.get(primaryPath);
+                                */
+
+                                obj1 = new JSONObject();
+                	            obj2 = new JSONObject();
+
+                	            obj1.put("SECONDARY", secondaryPath);
+                	            obj1.put("x", boxX);
+                	            obj1.put("y", boxY);
+                	            obj1.put("width", boxW);
+                	            obj1.put("height", boxH);
+
+                	            obj2.put(textArea.getText(), obj1);
+
+                                //jsonPrimaryPath.add(obj2);
+                	            //jsonObject = (JSONObject)jsonObject.get(key);
+                	            //jsonObject.put(primaryRootPath, obj2);
+                	            jsonArray.add(jsonObject.get(key));
+                	            jsonArray.add(obj2);
+
+                                try {
+                                	FileWriter fileToWrite = new FileWriter(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json", false);
+                                    fileToWrite.write(jsonArray.toJSONString());
+                                    fileToWrite.flush();
+                                    fileToWrite.close();
+                                } catch (IOException exc) {}
+                    	    }
+                    	    //System.out.println("key->" + key);
+                    	    //->/Users/yukamurata/Documents/USC/Fall 18/CSCI 576/FinalProject/Source/USCOne/USCOne0001.rgb
+                    	    //System.out.println(jsonObject.get(key));
+                    	    //->{"sign":{"SECONDARY":"\/Users\/yukamurata\/Documents\/USC\/Fall 18\/CSCI 576\/FinalProject\/Source\/USCTwo\/USCTwo0001.rgb","x":74.0,"width":204.0,"y":68.0,"height":124.0}}
+                    	}
+                    }
+                }
             	
+            	// For a frame that does not have a bounding box yet
 	            obj1 = new JSONObject();
 	            obj2 = new JSONObject();
 	            obj3 = new JSONObject();
@@ -405,6 +460,9 @@ public class Controller {
 	                file.write(jsonArray.toJSONString());
 	                file.flush();
 	            } catch (IOException exc) {}
+	            
+            	
+            	
                 //  END of JSON  /////////////////////////////////////////////////////////////
 
             	Button btn = new Button();

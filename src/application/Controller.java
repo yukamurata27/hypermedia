@@ -3,13 +3,16 @@ package application;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -21,6 +24,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
@@ -54,6 +58,11 @@ public class Controller {
 	private double boxY;
 	private double boxW;
 	private double boxH;
+	private int btnNum = 0;
+	
+	private JSONObject obj1;
+	private JSONObject obj2;
+	private JSONObject obj3;
 
 	@FXML private Slider sliderL;
 	@FXML private Slider sliderR;
@@ -312,46 +321,171 @@ public class Controller {
 
     static class Wrapper<T> { T value; }
 
+    private void changeLblName () throws Exception {
+    }
+
     @FXML
     private void connectVideo (ActionEvent event) throws Exception {
-    	//System.out.println("x: " + boxX + ", y: " + boxY + ", Width: " + boxW + ", Heigh: " + boxH);
-    	//System.out.println("PRIMARY   -> frame: " + ", path: " + primaryPath);
-    	//System.out.println("SECONDARY -> frame: " + ", path: " + secondaryPath);
-    	//System.out.println("SECONDARY -> frame: " + ", path: " + secondaryPath);
-
+    	// POPUP DIALOG ///////////////////////////////////////////////////////////////////////
     	final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         //dialog.initOwner(primaryStage);
-        //dialog.initModality(Modality.NONE);
-        VBox dialogVbox = new VBox(20);
-        dialogVbox.getChildren().add(new Text("This is a Dialog"));
+        dialog.initModality(Modality.NONE);
+        //VBox dialogVbox = new VBox(20);
+        //dialogVbox.getChildren().add(new Text("This is a Dialog"));
+        
+        Label linkNameLbl = new Label("Link name");
+
+        StringWriter sw = new StringWriter();
+        //PrintWriter pw = new PrintWriter(sw);
+        //ex.printStackTrace(pw);
+        String exceptionText = sw.toString();
         TextArea textArea = new TextArea(exceptionText);
-        Scene dialogScene = new Scene(dialogVbox, 300, 200);
-        dialog.setScene(dialogScene);
+        textArea.setPrefSize(350, 7);
+        
+        Label startlbl = new Label("Starting frame number");
+
+        StringWriter sw2 = new StringWriter();
+        //PrintWriter pw = new PrintWriter(sw);
+        //ex.printStackTrace(pw);
+        String exceptionText2 = sw2.toString();
+        TextArea startTxtArea = new TextArea(exceptionText2);
+        startTxtArea.setPrefSize(50, 7);
+        
+        Label endlbl = new Label("Ending frame number");
+
+        StringWriter sw3 = new StringWriter();
+        //PrintWriter pw = new PrintWriter(sw);
+        //ex.printStackTrace(pw);
+        String exceptionText3 = sw3.toString();
+        TextArea endTxtArea = new TextArea(exceptionText3);
+        endTxtArea.setPrefSize(50, 7);
+        
+        //Scene dialogScene = new Scene(dialogVbox, 300, 200);
+        //dialog.setScene(dialogScene);
+        
+        Button cancel = new Button();
+        cancel.setText("Cancel");
+        cancel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	dialog.close();
+            }
+        });
+
+        Button save = new Button();
+        save.setText("Save");
+        save.setOnAction(new EventHandler<ActionEvent>() {
+            @Override public void handle(ActionEvent e) {
+            	
+            	//  JSON  /////////////////////////////////////////////////////////////
+            	JSONArray jsonArray = new JSONArray();
+            	Object obj = new Object();
+            	try {
+	            	JSONParser jsonParser = new JSONParser();
+	            	obj = jsonParser.parse(new FileReader(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json"));
+	            	jsonArray = (JSONArray)obj;
+            	} catch (Exception exc){}
+
+            	
+	            obj1 = new JSONObject();
+	            obj2 = new JSONObject();
+	            obj3 = new JSONObject();
+
+	            obj1.put("SECONDARY", secondaryPath);
+	            obj1.put("x", boxX);
+	            obj1.put("y", boxY);
+	            obj1.put("width", boxW);
+	            obj1.put("height", boxH);
+
+	            obj2.put(textArea.getText(), obj1);
+	            obj3.put(primaryPath, obj2);
+	            jsonArray.add(obj3);
+
+	            try (FileWriter file = new FileWriter(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json")) {
+	                file.write(jsonArray.toJSONString());
+	                file.flush();
+	            } catch (IOException exc) {}
+                //  END of JSON  /////////////////////////////////////////////////////////////
+
+            	Button btn = new Button();
+            	btn.setLayoutX(0);
+                btn.setLayoutY(27*btnNum);
+            	linkPane.getChildren().add(btn);
+            	btn.setText(textArea.getText());
+            	btn.setOnAction(new EventHandler<ActionEvent>() {
+                    @Override public void handle(ActionEvent e) {
+                    	try {
+                    		final Stage editStage = new Stage();
+                    		editStage.initModality(Modality.APPLICATION_MODAL);
+                    		editStage.initModality(Modality.NONE);
+
+                            StringWriter sw4 = new StringWriter();
+                            String exceptionText4 = sw4.toString();
+                            TextArea editTxtArea = new TextArea(exceptionText4);
+                            editTxtArea.setText(textArea.getText());
+                            editTxtArea.setPrefSize(350, 7);
+
+                            StringWriter sw2 = new StringWriter();
+                            String exceptionText2 = sw2.toString();
+                            TextArea startTxtArea = new TextArea(exceptionText2);
+                            startTxtArea.setText("Get starting frame number");
+                            startTxtArea.setPrefSize(50, 7);
+
+                            StringWriter sw3 = new StringWriter();
+                            String exceptionText3 = sw3.toString();
+                            TextArea endTxtArea = new TextArea(exceptionText3);
+                            endTxtArea.setText("Get starting frame number");
+                            endTxtArea.setPrefSize(50, 7);
+                            
+                            Button cancel = new Button();
+                            cancel.setText("Cancel");
+                            cancel.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override public void handle(ActionEvent e) {
+                                	editStage.close();
+                                }
+                            });
+                    		
+                            Button save = new Button();
+                            save.setText("Save");
+                            save.setOnAction(new EventHandler<ActionEvent>() {
+                                @Override public void handle(ActionEvent e) {
+                                	btn.setText(editTxtArea.getText());
+                                	editStage.close();
+                                }
+                            });
+                            
+                            VBox vbox2 = new VBox();
+                            vbox2.getChildren().addAll(linkNameLbl, editTxtArea, startlbl, startTxtArea, endlbl, endTxtArea, cancel, save);
+                            Scene scene2 = new Scene(vbox2);
+
+                            editStage.setScene(scene2);
+                            editStage.show();
+                    	} catch(Exception exc){}
+                    }
+                });
+            	btnNum++;
+            	dialog.close();
+            }
+        });
+        
+        VBox vbox = new VBox();
+        vbox.getChildren().addAll(linkNameLbl, textArea, startlbl, startTxtArea, endlbl, endTxtArea, cancel, save);
+        Scene scene = new Scene(vbox);
+
+        dialog.setScene(scene);
         dialog.show();
-    	
-    	JSONObject obj1 = new JSONObject();
-    	JSONObject obj2 = new JSONObject();
-    	JSONArray ja = new JSONArray();
-
-    	obj1.put("primary", primaryPath);
-        obj2.put("name", "temp 1");
-        obj2.put("SECONDARY", secondaryPath);
-        obj2.put("x", boxX);
-        obj2.put("y", boxY);
-        obj2.put("width", boxW);
-        obj2.put("height", boxH);
-        obj1.put("frameNo", obj2);
-        ja.add(obj1);
-
-        //StringWriter out = new StringWriter();
+    }
+    
+    @FXML
+    private void saveFile (ActionEvent event) throws Exception {
+    	//StringWriter out = new StringWriter();
         //obj.writeJSONString(out);
 
         //String jsonText = out.toString();
         //System.out.print(jsonText);
-
-        try (FileWriter file = new FileWriter("meta.json")) {
-            file.write(ja.toJSONString());
+    	
+    	try (FileWriter file = new FileWriter("meta.json")) {
+            //file.write(ja.toJSONString());
             file.flush();
         } catch (IOException e) {
             e.printStackTrace();

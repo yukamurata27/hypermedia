@@ -24,5 +24,6 @@
           <AnchorPane fx:id="linkPane" minHeight="0.0" minWidth="0.0" prefHeight="355.0" prefWidth="213.0" />
         </content>
       </ScrollPane>
+      <Button layoutX="651.0" layoutY="21.0" mnemonicParsing="false" onAction="#saveFile" text="Save File" />
    </children>
 </AnchorPane>

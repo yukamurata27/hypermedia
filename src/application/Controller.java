@@ -3,7 +3,7 @@ package application;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+//import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,8 +15,8 @@ import java.util.Iterator;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.json.*;
+//import org.json.simple.parser.ParseException;
+//import org.json.*;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -38,6 +38,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.LineBuilder;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -68,7 +70,7 @@ public class Controller {
 	
 	private JSONObject obj1;
 	private JSONObject obj2;
-	private JSONObject obj3;
+	//private JSONObject obj3;
 	
 	private ArrayList<String> dataALst;
 	private ArrayList<String> linkNameALst;
@@ -92,7 +94,7 @@ public class Controller {
             	textL.setText("Frame " + String.valueOf(frameNum));
             	try {
             		primaryPath = primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + String.format("%04d", frameNum) + ".rgb");
-            		changeFrame(paneL, createBufferedImg(new File(primaryPath)));
+            		changeFrameL(paneL, createBufferedImg(new File(primaryPath)), frameNum);
             	} catch (Exception e) {}
             }
         });
@@ -125,8 +127,39 @@ public class Controller {
 	private void changeFrame (Pane p, BufferedImage img) {
 		Image i = SwingFXUtils.toFXImage(img, null);
 	    ImageView v = new ImageView(i);
+	    
 	    p.getChildren().clear();
 	    p.getChildren().add(v);
+	}
+	
+	private void changeFrameL (Pane p, BufferedImage img, int frameNum) {
+		Image i = SwingFXUtils.toFXImage(img, null);
+	    ImageView v = new ImageView(i);
+	    
+	    p.getChildren().clear();
+	    p.getChildren().add(v);
+	    
+	    int start, end;
+	    double x = 0, y = 0, w = 0, h = 0;
+	    for (String dataLine : dataALst) {
+	    	//System.out.println(dataLine.split(",")[0] + "----" + dataLine.split(",")[1]);
+	    	start = Integer.parseInt(dataLine.split(",")[0].substring(dataLine.split(",")[0].length()-8, dataLine.split(",")[0].length()-4));
+	    	end = Integer.parseInt(dataLine.split(",")[1].substring(dataLine.split(",")[1].length()-8, dataLine.split(",")[1].length()-4));
+	    	x = Double.parseDouble(dataLine.split(",")[3]);
+	    	y = Double.parseDouble(dataLine.split(",")[4]);
+	    	w = Double.parseDouble(dataLine.split(",")[5]);
+	    	h = Double.parseDouble(dataLine.split(",")[6]);
+	    	
+	    	//System.out.println(start + ", " + end + ", " + x + ", " + y + ", " + w + ", " + h);
+	    	
+	    	if (start <= end && start <= frameNum && frameNum <= end) {
+	    		Rectangle r2 = new Rectangle(x, y, w, h);
+	    		r2.setStroke(Color.BLACK);
+	    		r2.setFill(null);
+	    		r2.setStrokeWidth(2);
+	    		p.getChildren().add(r2);
+	    	}
+	    }
 	}
 
 	private BufferedImage createBufferedImg (File file) throws Exception {
@@ -525,6 +558,8 @@ public class Controller {
             	if (sFrame < 1 || 9000 < sFrame) {
             		return;
             	} else if (eFrame < 1 || 9000 < eFrame) {
+            		return;
+            	} else if (eFrame < sFrame) {
             		return;
             	}
             	

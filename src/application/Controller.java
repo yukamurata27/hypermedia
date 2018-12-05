@@ -62,7 +62,7 @@ public class Controller {
 	private double boxY;
 	private double boxW;
 	private double boxH;
-	private int btnNum = 0;
+	private int btnNum;
 	private ArrayList<String> tmpData = new ArrayList<String>();
 	boolean dupe;
 	
@@ -168,12 +168,84 @@ public class Controller {
 					public void handle(ActionEvent e) {
 						primaryFolder = directoryChooser.showDialog(stage);
 						try {
+							linkPane.getChildren().clear();
 							setLeftImg(primaryFolder);
 							loadJSON(primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json"));
+							btnNum = 0;
+							loadLinks();
+							sliderL.setValue(0.0);
+							textL.setText("Frame 1");
 						} catch (Exception error){}
 					}
 				}
 		);
+	}
+	
+	private void loadLinks () {
+		Label linkNameLbl = new Label("Link name");
+				
+		for (String it : linkNameALst) {
+			Button btn = new Button();
+	    	btn.setLayoutX(0);
+	        btn.setLayoutY(27*btnNum);
+	    	linkPane.getChildren().add(btn);
+	    	btn.setText(it);
+	    	btn.setOnAction(new EventHandler<ActionEvent>() {
+	            @Override public void handle(ActionEvent e) {
+	            	try {
+	            		
+	            		// Change a frame to the starting point
+	            		
+	            		int idx = linkNameALst.indexOf(it);
+	            		String startPath = dataALst.get(idx).split(",")[0];
+	            		String frameNumber = startPath.substring(startPath.length()-8, startPath.length()-4);
+	            		primaryPath = primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + frameNumber + ".rgb");
+	            		changeFrame(paneL, createBufferedImg(new File(primaryPath)));
+	            		
+	            		// Change slider
+	            		
+	            		sliderL.setValue(Double.parseDouble(frameNumber));
+	            		textL.setText("Frame " + frameNumber);
+	            		
+	            		final Stage editStage = new Stage();
+	            		editStage.initModality(Modality.APPLICATION_MODAL);
+	            		editStage.initModality(Modality.NONE);
+
+	                    StringWriter sw4 = new StringWriter();
+	                    String exceptionText4 = sw4.toString();
+	                    TextArea editTxtArea = new TextArea(exceptionText4);
+	                    editTxtArea.setText(it);
+	                    editTxtArea.setPrefSize(350, 7);
+	                    
+	                    Button cancel = new Button();
+	                    cancel.setText("Cancel");
+	                    cancel.setOnAction(new EventHandler<ActionEvent>() {
+	                        @Override public void handle(ActionEvent e) {
+	                        	editStage.close();
+	                        }
+	                    });
+	            		
+	                    Button save = new Button();
+	                    save.setText("Save");
+	                    save.setOnAction(new EventHandler<ActionEvent>() {
+	                        @Override public void handle(ActionEvent e) {
+	                        	btn.setText(editTxtArea.getText());
+	                        	linkNameALst.set(linkNameALst.indexOf(it), editTxtArea.getText());
+	                        	editStage.close();
+	                        }
+	                    });
+	                    
+	                    VBox vbox2 = new VBox();
+	                    vbox2.getChildren().addAll(linkNameLbl, editTxtArea, cancel, save);
+	                    Scene scene2 = new Scene(vbox2);
+
+	                    editStage.setScene(scene2);
+	                    editStage.show();
+	            	} catch(Exception exc){}
+	            }
+	        });
+	    	btnNum++;
+		}
 	}
 	
 	/*
@@ -201,7 +273,6 @@ public class Controller {
             Iterator it = jsonArray.iterator();
             while (it.hasNext()) {
             	JSONObject jsonObject = (JSONObject) it.next();
-            	System.out.println(jsonObject.toString());
             	for(Iterator dataIter = jsonObject.entrySet().iterator(); dataIter.hasNext();) {
             		Object jsonobj = dataIter.next();
             		String key = jsonobj.toString().split("=")[0];
@@ -212,22 +283,23 @@ public class Controller {
             		String dataLine = "";
             		
             		/*
-            		System.out.println("0" + pairs[0].split(":")[1]);
-            		System.out.println("1" + pairs[1].split(":")[1]);
-            		System.out.println("2" + pairs[2].split(":")[1]);
-            		System.out.println("3" + pairs[3].split(":")[1]);
-            		System.out.println("4" + pairs[4].split(":")[1]);
-            		System.out.println("5" + pairs[5].split(":")[1]);
-            		System.out.println("6" + pairs[6].split(":")[1]);
+            		System.out.println("0: " + pairs[0].split(":")[1]);
+            		System.out.println("1: " + pairs[1].split(":")[1]);
+            		System.out.println("2: " + pairs[2].split(":")[1]);
+            		System.out.println("3: " + pairs[3].split(":")[1]);
+            		System.out.println("4: " + pairs[4].split(":")[1]);
+            		System.out.println("5: " + pairs[5].split(":")[1]);
+            		System.out.println("6:" + pairs[6].split(":")[1]);
             		*/
             		
-            		dataLine += pairs[5].split(":")[1];
-            		dataLine += "," + pairs[4].split(":")[1];
-            		dataLine += "," + pairs[0].split(":")[1];
-            		dataLine += "," + pairs[1].split(":")[1];
-            		dataLine += "," + pairs[3].split(":")[1];
-            		dataLine += "," + pairs[1].split(":")[1];
-            		dataLine += "," + pairs[6].split(":")[1];
+            		dataLine += pairs[5].split(":")[1].substring(2, pairs[5].split(":")[1].length()-1).replace("\\","");
+            		dataLine += "," + pairs[4].split(":")[1].substring(2, pairs[4].split(":")[1].length()-1).replace("\\","");
+            		dataLine += "," + pairs[0].split(":")[1].substring(2, pairs[0].split(":")[1].length()-1).replace("\\","");
+            		dataLine += "," + pairs[1].split(":")[1].substring(1, pairs[1].split(":")[1].length()-1).replace("\\","");
+            		dataLine += "," + pairs[3].split(":")[1].substring(1, pairs[3].split(":")[1].length()-1).replace("\\","");
+            		dataLine += "," + pairs[2].split(":")[1].substring(1, pairs[2].split(":")[1].length()-1).replace("\\","");
+            		dataLine += "," + pairs[6].split(":")[1].substring(1, pairs[6].split(":")[1].length()-1).replace("\\","");
+            		//System.out.println("data 2 (dataline) is " + dataLine);
             		dataALst.add(dataLine);
             	}
             }
@@ -445,49 +517,34 @@ public class Controller {
         save.setText("Save");
         save.setOnAction(new EventHandler<ActionEvent>() {
             @Override public void handle(ActionEvent e) {
+            	// Validation of frame numbers
+            	
+            	int sFrame = Integer.parseInt(startTxtArea.getText().replaceAll("\\D+",""));
+            	int eFrame = Integer.parseInt(endTxtArea.getText().replaceAll("\\D+",""));
+            	
+            	if (sFrame < 1 || 9000 < sFrame) {
+            		return;
+            	} else if (eFrame < 1 || 9000 < eFrame) {
+            		return;
+            	}
+            	
+            	// Check uniqueness of link name
+            	if (linkNameALst.contains(textArea.getText())) {
+            		return;
+            	}
+            		
             	linkNameALst.add(textArea.getText());
             	
             	String data = "";
-            	data += primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + startTxtArea.getText() + ".rgb");
-            	data += "," + primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + endTxtArea.getText() + ".rgb");
+            	data += primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + String.format("%04d", sFrame) + ".rgb");
+            	data += "," + primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + String.format("%04d", eFrame) + ".rgb");
             	data += "," + secondaryPath;
             	data += "," + boxX;
             	data += "," + boxY;
             	data += "," + boxW;
             	data += "," + boxH;
+            	//System.out.println("data 1 looks like " + data);
             	dataALst.add(data);
-            	//  JSON  /////////////////////////////////////////////////////////////
-            	/*
-            	JSONParser jsonParser = new JSONParser();
-            	JSONArray jsonArray = new JSONArray();
-            	Object obj = new Object();
-            	try {
-	            	obj = jsonParser.parse(new FileReader(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json"));
-	            	jsonArray = (JSONArray)obj;
-            	} catch (Exception exc){}
-            	
-		        obj1 = new JSONObject();
-		        obj2 = new JSONObject();
-		            
-		        obj1.put("primaryStart", primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + startTxtArea.getText() + ".rgb"));
-		        obj1.put("primaryEnd", primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + endTxtArea.getText() + ".rgb"));
-		        obj1.put("secondary", secondaryPath);
-		        obj1.put("x", boxX);
-		        obj1.put("y", boxY);
-		        obj1.put("width", boxW);
-		        obj1.put("height", boxH);
-	
-		        obj2.put(textArea.getText(), obj1);
-		        jsonArray.add(obj2);
-	
-		        try (FileWriter file = new FileWriter(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json")) {
-		            file.write(jsonArray.toJSONString());
-		            file.flush();
-		        } catch (IOException exc) {}
-	            */
-            	
-            	
-                //  END of JSON  /////////////////////////////////////////////////////////////
 
             	Button btn = new Button();
             	btn.setLayoutX(0);
@@ -497,6 +554,19 @@ public class Controller {
             	btn.setOnAction(new EventHandler<ActionEvent>() {
                     @Override public void handle(ActionEvent e) {
                     	try {
+                    		// Change the frame to the starting point
+                    		
+                    		int idx = linkNameALst.indexOf(textArea.getText());
+                    		String startPath = dataALst.get(idx).split(",")[0];
+                    		String frameNumber = startPath.substring(startPath.length()-8, startPath.length()-4);
+                    		primaryPath = primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + frameNumber + ".rgb");
+                    		changeFrame(paneL, createBufferedImg(new File(primaryPath)));
+                    		
+                    		// Change slider
+    	            		
+    	            		sliderL.setValue(Double.parseDouble(frameNumber));
+    	            		textL.setText("Frame " + frameNumber);
+                    		
                     		final Stage editStage = new Stage();
                     		editStage.initModality(Modality.APPLICATION_MODAL);
                     		editStage.initModality(Modality.NONE);
@@ -506,20 +576,6 @@ public class Controller {
                             TextArea editTxtArea = new TextArea(exceptionText4);
                             editTxtArea.setText(textArea.getText());
                             editTxtArea.setPrefSize(350, 7);
-
-                            /* Allow user to change starting and ending frame numbers
-                            StringWriter sw2 = new StringWriter();
-                            String exceptionText2 = sw2.toString();
-                            TextArea startTxtArea = new TextArea(exceptionText2);
-                            startTxtArea.setText("Get starting frame number");
-                            startTxtArea.setPrefSize(50, 7);
-
-                            StringWriter sw3 = new StringWriter();
-                            String exceptionText3 = sw3.toString();
-                            TextArea endTxtArea = new TextArea(exceptionText3);
-                            endTxtArea.setText("Get starting frame number");
-                            endTxtArea.setPrefSize(50, 7);
-                            */
                             
                             Button cancel = new Button();
                             cancel.setText("Cancel");
@@ -534,69 +590,13 @@ public class Controller {
                             save.setOnAction(new EventHandler<ActionEvent>() {
                                 @Override public void handle(ActionEvent e) {
                                 	btn.setText(editTxtArea.getText());
-                                	
-                                	///// MODIFY JSON FILE BELOW ///////////////////////////////////////////////////////////
-                                	/* Allow user to edit a bounding box
-                                	JSONParser jsonParser = new JSONParser();
-                                	JSONArray jsonArray = new JSONArray();
-                                	Object obj = new Object();
-                                	try {
-                    	            	obj = jsonParser.parse(new FileReader(primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + ".json"));
-                    	            	jsonArray = (JSONArray)obj;
-                                	} catch (Exception exc){}
-
-                                	if (jsonArray != null) {
-                                        Iterator it = jsonArray.iterator();
-                                        while (it.hasNext()) {
-                                            //String primary = it.next().toString();
-                                        	
-                                        	JSONObject jsonObject = (JSONObject) it.next();
-                                        	Iterator it2 = jsonObject.entrySet().iterator();
-                                        	for(Iterator iterator = jsonObject.keySet().iterator(); iterator.hasNext();) {
-                                        		
-                                        		Object jsonobj = iterator.next();
-                                        		System.out.println("value is " + it2.next().toString());
-                                        		System.out.println("jsonobj is " + jsonobj.toString());
-                                        		String key = (String) jsonobj;
-                                        	    if (key.equals(textArea.getText())) {
-                                        	    	System.out.println("Key is " + key);
-                                        	    	
-                                        	    	
-                                        	    	
-                                        	    	
-                                        	    	
-                                        	    	Maybe need to remove the entire object itseld, make a new jsonobject, and add it to json file
-                                        	    	
-                                        	    	obj1.put("primaryStart", primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + startTxtArea.getText() + ".rgb"));
-                                		            obj1.put("primaryEnd", primaryRootPath + "/" + (primaryRootPath.substring(primaryRootPath.lastIndexOf("/") + 1) + endTxtArea.getText() + ".rgb"));
-                                		            obj1.put("secondary", secondaryPath);
-                                		            obj1.put("x", boxX);
-                                		            obj1.put("y", boxY);
-                                		            obj1.put("width", boxW);
-                                		            obj1.put("height", boxH);
-                                	
-                                		            obj2.put(textArea.getText(), obj1);
-                                		            jsonArray.add(obj2);
-                                        	    	
-                                        	    	
-                                		            
-                                		            
-                                		            
-                                        	    	// CAN YOU JUST SWAP DATA????
-                                        	    	//jsonobj.put(editTxtArea.getText(), jsonobj.get(textArea.getText()));
-                                        	    	//jsonobj.remove(textArea.getText());
-                                        	    }
-                                        	}
-                                        }
-                                    }
-                    				*/
-                                	///// MODIFY JSON FILE ABOVE ///////////////////////////////////////////////////////////
+                                	linkNameALst.set(linkNameALst.indexOf(textArea.getText()), editTxtArea.getText());
                                 	editStage.close();
                                 }
                             });
                             
                             VBox vbox2 = new VBox();
-                            vbox2.getChildren().addAll(linkNameLbl, editTxtArea, startlbl, startTxtArea, endlbl, endTxtArea, cancel, save);
+                            vbox2.getChildren().addAll(linkNameLbl, editTxtArea, cancel, save);
                             Scene scene2 = new Scene(vbox2);
 
                             editStage.setScene(scene2);

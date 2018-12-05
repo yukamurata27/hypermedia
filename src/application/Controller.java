@@ -38,8 +38,8 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.LineBuilder;
+//import javafx.scene.shape.Line;
+//import javafx.scene.shape.LineBuilder;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
@@ -65,7 +65,7 @@ public class Controller {
 	private double boxW;
 	private double boxH;
 	private int btnNum;
-	private ArrayList<String> tmpData = new ArrayList<String>();
+	//private ArrayList<String> tmpData = new ArrayList<String>();
 	boolean dupe;
 	
 	private JSONObject obj1;
@@ -493,9 +493,6 @@ public class Controller {
     }
 
     static class Wrapper<T> { T value; }
-
-    private void changeLblName () throws Exception {
-    }
 
     @FXML
     private void connectVideo (ActionEvent event) throws Exception {
